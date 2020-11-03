@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 
@@ -62,22 +65,30 @@ namespace iterators_and_generators
             //    long fileSize = info.Length;
             //}
 
-            IEnumerable<IGrouping<string, string>> query = files.GroupBy(file => Path.GetExtension(file)); 
+ 
 
-            foreach (IGrouping<string, string> grouping in query)
-            {
-                Console.WriteLine("Extension: " + grouping.Key); 
+            var rows = files.GroupBy(file => Path.GetExtension(file))
+                                    .Select(Group => new
+                                    {
+                                        Extension = Group.Key,
+                                        Count = Group.Count(),
+                                        Size = FormatByteSize(Group.Select(file => new FileInfo(file).Length).Sum())
+                                    });
 
-                foreach (string filename in grouping)
-                {
-                    Console.WriteLine("    - " + filename); 
-                }
+            var orderedRows = rows.OrderByDescending(row => row.Size); 
+          
+
+            foreach (var row in orderedRows) {
+                Console.WriteLine("{0} {1} {2}", row.Extension, row.Count, row.Size); 
             }
-
+               
+            
             //dataReport.Save(reportPath); 
 
 
         }
+
+        
 
         static string FormatByteSize(long byteSize)
         {
