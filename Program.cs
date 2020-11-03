@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO; 
+using System.IO;
+using System.Xml.Linq;
+
+// This Program is designed to implement lazy loading. 
 
 namespace iterators_and_generators
 {
@@ -8,24 +11,40 @@ namespace iterators_and_generators
     {
         static void Main(string[] args)
         {
-            //string pathOfDirectory = args[0];
+            // Store the given path from the command line 
+            string pathOfDirectory = args[0];
 
-            ////EnumerateFilesRecursively(pathOfDirectory);
-            long byteSize = long.Parse(args[0]);
-            Console.WriteLine("Enterted Byte Size: " + byteSize);
-            Console.WriteLine("Formatted Byte Size: " + FormatByteSize(byteSize)); 
+            // Call CreateReport() 
+            CreateReport(EnumerateFilesRecursively(pathOfDirectory));
+
         }
 
+        // Method that takes a path for a given directory and returns each file in the directory in lower case 
         static IEnumerable<string> EnumerateFilesRecursively(string path)
         {
+            // Enumerator object for iterating through the files in a given path  
             var allFiles = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories); 
             
+            // Iterate through all the files 
             foreach (string currentFile in allFiles)
             {
-                Console.WriteLine(currentFile.ToLower()); 
+                yield return currentFile.ToLower(); // Return each file, and yield to the caller method
             }
 
-            return null;
+       
+        }
+
+        static void CreateReport(IEnumerable<string> files)
+        {
+
+            foreach(string file in files)
+            {
+                FileInfo info = new FileInfo(file);
+                long fileSize = info.Length;
+                Console.WriteLine(fileSize); 
+
+            }
+            
         }
 
         static string FormatByteSize(long byteSize)
@@ -33,9 +52,9 @@ namespace iterators_and_generators
 
             const int scale = 1000; // 1kB = 1000 Bytes
             string[] sizes = new string[] { "ZB", "EB", "PB", "TB", "GB", "MB", "kB", "Bytes" }; // {1 Byte, 1kb == 1000 Bytes, 1mb == 1,000,000 Bytes, ... }
-            decimal maxSize = (decimal)Math.Pow(scale, sizes.Length - 1); 
+            decimal maxSize = (decimal)Math.Pow(scale, sizes.Length - 1);
 
-            foreach(string size in sizes)
+            foreach (string size in sizes)
             {
                 if (byteSize >= maxSize)
 
@@ -44,7 +63,9 @@ namespace iterators_and_generators
                 maxSize /= scale; // reduce the max
             }
 
-            return "0 Bytes"; // no max
+            return byteSize + " Bytes"; // no max
+
+
         }
     }
 }
