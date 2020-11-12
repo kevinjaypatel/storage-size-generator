@@ -26,12 +26,21 @@ namespace iterators_and_generators
         {
             // Store the given path from the command line 
             string examinDirectoryPath = args[0];
+
             // Store the name of the report file 
             reportFileName = args[1];
+
             // Initialize the path for the report document 
             reportPath = Path.Combine(projectDirectory, reportFileName);
-            // Create the report  
-            CreateReport(EnumerateFilesRecursively(examinDirectoryPath));
+             
+            // Enumerate the files using a generator 
+            IEnumerable<string> files = EnumerateFilesRecursively(examinDirectoryPath); 
+
+            // Store the HTML document 
+            XDocument dataReport = CreateReport(files);
+
+            // Save the report 
+            dataReport.Save(reportPath); 
 
         }
 
@@ -50,15 +59,19 @@ namespace iterators_and_generators
 
         }
 
-        static void CreateReport(IEnumerable<string> files)
+        static XDocument CreateReport(IEnumerable<string> files)
         {
+            return new XDocument(new XElement("table",
+                                 new XElement("thead",
+                                 new XElement("tr", 
+                                 new XElement("th", "Type"),
+                                 new XElement("th", "Count"),
+                                 new XElement("th", "Size"),
+                                 new XElement(AddReportData(files))))));
+        }
 
-            XElement dataReport = new XElement("table",
-                new XElement("tr",
-                    new XElement("th", "Type"),
-                    new XElement("th", "Count"),
-                    new XElement("th", "Size")));
-
+        static XElement AddReportData(IEnumerable<string> files)
+        {
             var groupedFiles = files.GroupBy(file => Path.GetExtension(file))
                                     .Select(Group => new
                                     {
@@ -67,21 +80,22 @@ namespace iterators_and_generators
                                         Size = FormatByteSize(Group.Select(file => new FileInfo(file).Length).Sum())
                                     })
                                     .OrderByDescending(groupedFile => groupedFile.Size);
-  
-            foreach (var groupedFile in groupedFiles) {
 
-                dataReport.Add(new XElement("tr", new XAttribute("style", "width: 40%"),
-                                    new XElement("th", groupedFile.Extension),
-                                    new XElement("th", groupedFile.Count),
-                                    new XElement("th", groupedFile.Size))); 
+
+            XElement dataElementWrapper = new XElement("tbody");
+
+            foreach(var groupedFile in groupedFiles)
+            {
+                dataElementWrapper.Add(new XElement("tr", new XAttribute("style", "width: 40%"),
+                                         new XElement("td", groupedFile.Extension),
+                                         new XElement("td", groupedFile.Count),
+                                         new XElement("td", groupedFile.Size)));
             }
-
-            dataReport.Save(reportPath);
-
+            
+            return dataElementWrapper; 
         }
 
-
-
+      
         static string FormatByteSize(long byteSize)
         {
 
@@ -98,7 +112,6 @@ namespace iterators_and_generators
             }
 
             return byteSize + " Bytes"; // no max
-
 
         }
     }
