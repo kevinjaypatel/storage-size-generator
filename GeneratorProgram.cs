@@ -96,16 +96,12 @@ namespace iterators_and_generators
                                     .OrderByDescending(groupedFile => groupedFile.TotalSizeInBytes); // Order groups of files based on total size in descending order 
 
             // Wrapper for appending child row elements consisting of data for the report 
-            XElement dataElementWrapper = new XElement("tbody");
-
-
-            foreach(var groupedFile in groupedFiles)
-            {
-                dataElementWrapper.Add(new XElement("tr", new XAttribute("style", "width: 40%"), // Add a width attrbute for the rows to create space between the data 
-                                         new XElement("td", groupedFile.Extension),              // Table data: file extension
-                                         new XElement("td", groupedFile.Count),                  // Table data: group file count 
-                                         new XElement("td", groupedFile.FormattedSize)));        // Table data: formatted size in bytes of group file data 
-            }
+            XElement dataElementWrapper = new XElement("tbody",
+                                                from groupedFile in groupedFiles.AsEnumerable()
+                                                select new XElement("tr", new XAttribute("style", "width: 40%"),
+                                                       new XElement("td", groupedFile.Extension),
+                                                       new XElement("td", groupedFile.Count),
+                                                       new XElement("td", groupedFile.FormattedSize))); 
             
             // return the wrapper element back to the caller 
             // to finish constructing the report 
@@ -118,7 +114,7 @@ namespace iterators_and_generators
         {
 
             const int scale = 1000; // 1kB = 1000 Bytes
-            string[] sizes = new string[] { "ZB", "EB", "PB", "TB", "GB", "MB", "KB", "Bytes" }; // {1 Byte, 1kb == 1000 Bytes, 1mb == 1,000,000 Bytes, ... }
+            string[] sizes = new string[] { "ZB", "EB", "PB", "TB", "GB", "MB", "KB", "B" }; // {1 Byte, 1kb == 1000 Bytes, 1mb == 1,000,000 Bytes, ... }
             decimal maxSize = (decimal)Math.Pow(scale, sizes.Length - 1); // used for storing the maxsize of byte conversion, i.e. 1 TB = (1000)^4
 
             // Loop through each of the sizes from the array starting from the hightest value (1 ZB)
@@ -132,7 +128,7 @@ namespace iterators_and_generators
                 maxSize /= scale; // reduce the max in case the given bytesize is smaller then the max size 
             }
 
-            return byteSize + " Bytes"; // the value of the given byte size is < 1000 
+            return byteSize + " B"; // the value of the given byte size is < 1000 
 
         }
     }
