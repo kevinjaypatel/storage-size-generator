@@ -5,8 +5,7 @@ This program uses generators in C# for iterating through a sequence of files. By
 * path of a directory 
 * name of an output file 
 
-In effect, the program outputs an HTML table within the project directory. The output file renders a list of grouped file extensions, their total count, and their total size in bytes.  
-
+The program creates an HTML file within the project directory. The output file renders an HTML table that includes a list of grouped file extensions, their total count, and their total size in bytes.  
 
 ## Installation
 
