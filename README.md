@@ -1,6 +1,6 @@
 # Lazy Evaluation in C#  
 
-This program uses generators in C# for iterating through a sequence of files. By using lazy evaluation, the programmer is able to preserve memory and modularize code by separating logic in different functions. Ultimately, this program takes two inputs from the command line respectively: 
+This program uses generators in C# for iterating through a sequence of files. By using lazy evaluation, the programmer is able to preserve memory and modularize code by separating logic in different functions. This program takes two inputs from the command line respectively: 
 
 * path of a directory 
 * name of an output file 
